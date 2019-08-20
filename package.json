@@ -1,0 +1,43 @@
+{
+  "name": "serial-half-duplex",
+  "version": "1.0.0",
+  "description": "Half-duplex serial port for communication with serial devices",
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
+  "files": [
+    "dist/src/*",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "prepack": "rm -rf dist && npm run build",
+    "prepublishOnly": "npm run test",
+    "test": "jasmine"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Granjow/serial-half-duplex.git"
+  },
+  "keywords": [
+    "serial",
+    "half",
+    "duplex"
+  ],
+  "author": "Simon A. Eugster <simon.eu@gmail.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Granjow/serial-half-duplex/issues"
+  },
+  "homepage": "https://github.com/Granjow/serial-half-duplex#readme",
+  "devDependencies": {
+    "@types/jasmine": "^3.4.0",
+    "@types/node": "^12.7.2",
+    "jasmine": "^3.4.0",
+    "jasmine-core": "^3.4.0",
+    "typescript": "^3.5.3"
+  },
+  "dependencies": {
+    "semaphore-promise": "^1.2.0",
+    "serialport": "^7.1.5"
+  }
+}
