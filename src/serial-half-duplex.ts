@@ -77,31 +77,26 @@ export class SerialHalfDuplex {
      * @param timeout How long to wait for an answer
      */
     sendAndReceive( cmd : Buffer, timeout : number = 20 ) : Promise<Buffer> {
-        const result : Promise<Buffer> = this._semaphore.acquire().then( ( release ) => new Promise<Buffer>( ( resolve, reject ) => {
+        const result : Promise<Buffer> = this._semaphore.acquire().then( ( releaseSemaphore ) => new Promise<Buffer>( ( resolve, reject ) => {
             if ( this.debugMode ) console.log( `Serial → ${cmd}` );
 
             this._port.write( cmd );
 
             const answerTimeout = setTimeout( () => {
                 reject( 'Timeout; no answer received' );
-                release();
+                releaseSemaphore();
             }, timeout );
 
             this._currentReader = ( line : Buffer ) => {
-                try {
-                    resolve( line );
-                    clearTimeout( answerTimeout );
-                } catch ( e ) {
-                    console.error( `Could not read line: ${e.message}`, e );
-                }
-                release();
+                clearTimeout( answerTimeout );
+                resolve( line );
+                releaseSemaphore();
             };
 
         } ) );
-        result.finally( () => {
+        return result.finally( () => {
             this.resetReader()
         } );
-        return result;
     }
 
     /**

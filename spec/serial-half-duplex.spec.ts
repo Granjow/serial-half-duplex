@@ -1,32 +1,6 @@
-import { Transform } from 'stream';
-import { ISerialPort, SerialHalfDuplex } from '../src/serial-half-duplex';
+import { SerialHalfDuplex } from '../src/serial-half-duplex';
+import { VirtualSerialPort } from './virtual-serial.port';
 
-
-class VirtualSerialPort implements ISerialPort {
-
-    on( eventName : string, f : () => void ) : void {
-    }
-
-    pipe( dest : Transform ) : any {
-        this._dest = dest;
-        return dest;
-    }
-
-    writeToPipe( data : Buffer ) {
-        this._dest._write( data, 'utf8', ( err:any ) => {
-            if ( err ) throw new Error( err );
-        } );
-    }
-
-    _dest : Transform;
-
-    write( data : Buffer | string ) : boolean {
-        return true;
-    }
-
-    drain( f? : ( error : any ) => void ) : void {
-    }
-}
 
 describe( 'Half duplex serial IO', () => {
 
@@ -52,5 +26,24 @@ describe( 'Half duplex serial IO', () => {
         }, 10 );
         return expectAsync( shd.sendAndReceive( Buffer.from( 'foo' ), 50 ) ).toBeResolvedTo( Buffer.from( '123' ) );
     } );
+
+    it( 'rejects after timeout', () => {
+        const shd = new SerialHalfDuplex( port );
+        return expectAsync( shd.sendAndReceive( Buffer.from( 'foo' ), 20 ) ).toBeRejected();
+    }, 100 );
+
+    it( 'rejects after timeout, b', ( done ) => {
+        const shd = new SerialHalfDuplex( port );
+        shd.sendAndReceive( Buffer.from( 'foo' ), 20 )
+            .then( () => {
+                expect( true ).toBe( false );
+            }, () => expect( true ).toBe( true ) )
+            .finally( done );
+    }, 100 );
+
+    it( 'rejects after timeout, test', () => {
+        const p = new Promise( ( resolve, reject ) => setTimeout( reject, 20 ) );
+        return expectAsync( p ).toBeRejected();
+    }, 100 );
 
 } );
