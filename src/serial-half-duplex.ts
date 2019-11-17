@@ -11,7 +11,9 @@ export interface ISerialPort {
 
     write( data : Buffer ) : boolean;
 
-    drain( f? : ( error : any ) => void ) : void;
+    drain( f? : ( error? : any ) => void ) : void;
+
+    close( f? : ( error? : any ) => void ) : void;
 }
 
 export class SerialHalfDuplex {
@@ -108,6 +110,18 @@ export class SerialHalfDuplex {
             this._port.write( cmd );
             this._port.drain();
             release();
+        } );
+    }
+
+    /**
+     * Close the serial port.
+     */
+    close() : Promise<void> {
+        return new Promise( ( resolve, reject ) => {
+            this._port.close( ( error : any ) => {
+                if ( error ) reject( error );
+                else resolve();
+            } );
         } );
     }
 

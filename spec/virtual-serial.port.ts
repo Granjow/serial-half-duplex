@@ -23,6 +23,10 @@ export class VirtualSerialPort implements ISerialPort {
         return true;
     }
 
-    drain( f? : ( error : any ) => void ) : void {
+    drain( f? : ( error? : any ) => void ) : void {
+    }
+
+    close( f : ( error? : any ) => void ) : void {
+        f();
     }
 }
