@@ -23,6 +23,12 @@ serial.sendAndReceive( Buffer.from( 'Hello!' ), timeoutMillis )
 
 See your favourite editor’s autocomplete support for the full documentation.
 
+#### new SerialHalfDuplex( port : ISerialPort, args? : SerialHalfDuplexArgs )
+
+Constructor. `args` allows to configure
+
+* `delimiter` which makrs the end of a response
+
 #### sendAndReceive( cmd : Buffer, timeout : number ) : Promise&lt;Buffer&gt;
 
 Send a command and wait for an answer. The timeout is in milliseconds.
@@ -30,3 +36,11 @@ Send a command and wait for an answer. The timeout is in milliseconds.
 #### send( cmd : Buffer ) : Promise&lt;void&gt;
 
 Simply send a command without waiting for an answer.
+
+
+## Changelog
+
+### Upcoming
+
+* Changed: `SerialHalfDuplex` accepts a configuration object to configure the response delimiter
+* Changed: `SerialHalfDuplex.openSerialPort` now accepts arguments for serial port configuration.

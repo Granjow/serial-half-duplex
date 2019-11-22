@@ -16,7 +16,26 @@ export interface ISerialPort {
     close( f? : ( error? : any ) => void ) : void;
 }
 
+export interface SerialHalfDuplexArgs {
+    /** What is used by the communication endpoint to mark the end of a response? Often `\r` or `\r\n`. */
+    delimiter : string;
+}
+
+export interface SerialPortArgs {
+    baudRate : number;
+    dataBits : number;
+    parity : string;
+    stopBits : number;
+}
+
 export class SerialHalfDuplex {
+
+    static readonly defaultSerialPortArgs : SerialPortArgs = {
+        baudRate: 9600,
+        dataBits: 8,
+        parity: 'none',
+        stopBits: 1,
+    };
 
     static findSuitablePort() : Promise<string> {
         return SerialPort.list().then( ( portInfo : any[] ) => {
@@ -29,16 +48,14 @@ export class SerialHalfDuplex {
         } );
     }
 
-    static openSerialPort( portName : string ) : ISerialPort {
+    static openSerialPort( portName : string, args? : SerialPortArgs ) : ISerialPort {
 
         console.log( `Opening serial port ${portName} …` );
 
-        return new SerialPort( portName, {
-            baudRate: 9600, // default = 9600
-            dataBits: 8, // default = 8
-            parity: 'none', // default = none
-            stopBits: 1, // default = 1
-        }, ( error : Error ) => {
+        const settings : SerialPortArgs = Object.assign( {}, SerialHalfDuplex.defaultSerialPortArgs, args );
+        console.log( 'Settings:', JSON.stringify( settings ) );
+
+        return new SerialPort( portName, settings, ( error : Error ) => {
             if ( error ) {
                 console.log( `Could not open port: ${error.message}` );
             } else {
@@ -53,14 +70,15 @@ export class SerialHalfDuplex {
 
     /**
      * @param port Needs to be opened beforehand, e.g. with SerialHalfDuplex#openSerialPort
+     * @param args Additional arguments to configure serial settings
      */
-    constructor( port : ISerialPort ) {
+    constructor( port : ISerialPort, args? : SerialHalfDuplexArgs ) {
 
         port.on( 'error', () => {
             console.error( `Unhandled serial error` );
         } );
 
-        const parser = port.pipe( new Delimiter( { delimiter: Buffer.from( '\r\n' ) } ) );
+        const parser = port.pipe( new Delimiter( { delimiter: Buffer.from( ( args && args.delimiter ) || '\r\n' ) } ) );
         parser.on( 'data', ( data : any ) => {
             if ( this.debugMode ) console.log( `Serial ← ${data}` );
             this._currentReader( Buffer.from( data ) );
