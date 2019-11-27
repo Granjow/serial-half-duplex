@@ -1,6 +1,6 @@
 # Half-Duplex Serial Port
 
-This package uses [serialport](https://www.npmjs.com/package/serialport) and adds half-duplex functions.
+This package uses [serialport](https://www.npmjs.com/package/serialport) and adds half-duplex functionality (i.e. send-and-receive).
 It supports TypeScript.
 
 For serial communication, one usually wants to send a command and wait for an answer. This Promise based
@@ -27,11 +27,16 @@ See your favourite editor’s autocomplete support for the full documentation.
 
 Constructor. `args` allows to configure
 
-* `delimiter` which makrs the end of a response
+* `delimiter` which marks the end of a response
 
 #### sendAndReceive( cmd : Buffer, timeout : number ) : Promise&lt;Buffer&gt;
 
-Send a command and wait for an answer. The timeout is in milliseconds.
+Send a command and wait for an answer.
+
+The timeout is in milliseconds. It is required because serial communication
+does not specify a request/response protocol and we just *assume* the client
+will respond within a defined amount of time (but it might not reply at all,
+for example because it is disconnected).
 
 #### send( cmd : Buffer ) : Promise&lt;void&gt;
 
@@ -40,7 +45,7 @@ Simply send a command without waiting for an answer.
 
 ## Changelog
 
-### Upcoming
+### v1.2.0 (2019-11-27)
 
 * Changed: `SerialHalfDuplex` accepts a configuration object to configure the response delimiter
 * Changed: `SerialHalfDuplex.openSerialPort` now accepts arguments for serial port configuration.

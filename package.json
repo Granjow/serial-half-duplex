@@ -20,8 +20,8 @@
   },
   "keywords": [
     "serial",
-    "half",
-    "duplex"
+    "half-duplex",
+    "communication"
   ],
   "author": "Simon A. Eugster <simon.eu@gmail.com>",
   "license": "ISC",
