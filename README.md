@@ -38,6 +38,14 @@ does not specify a request/response protocol and we just *assume* the client
 will respond within a defined amount of time (but it might not reply at all,
 for example because it is disconnected).
 
+#### sendAndReceiveMany( …, expedtedLines : number ) : Promise&lt;Buffer[]&gt;
+
+Send a command and wait for multiple answers.
+
+For example, some beamers like the H5382BD send two lines in response when querying the beamer state,
+the answer is `*001\rLAMP 0\r`.
+
+
 #### send( cmd : Buffer ) : Promise&lt;void&gt;
 
 Simply send a command without waiting for an answer.
