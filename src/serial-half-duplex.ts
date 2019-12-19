@@ -97,25 +97,47 @@ export class SerialHalfDuplex {
      * @param timeout How long to wait for an answer
      */
     sendAndReceive( cmd : Buffer, timeout : number = 20 ) : Promise<Buffer> {
-        const result : Promise<Buffer> = this._semaphore.acquire().then( ( releaseSemaphore ) => new Promise<Buffer>( ( resolve, reject ) => {
+        return this.sendAndReceiveMany( cmd, timeout, 1 )
+            .then( ( result ) => result[ 0 ] );
+    }
+
+
+    /**
+     * Send a command and wait for an answer.
+     * @param cmd Command to send
+     * @param timeout How long to wait for an answer
+     * @param expectedLines Specifies the number of expected lines. Some devices (like e.g. the H5382BD beamer) return two lines.
+     */
+    sendAndReceiveMany( cmd : Buffer, timeout : number = 20, expectedLines : number = 1 ) : Promise<Buffer[]> {
+        const result : Promise<Buffer[]> = this._semaphore.acquire().then( ( releaseSemaphore ) => new Promise<Buffer[]>( ( resolve, reject ) => {
             if ( this.debugMode ) console.log( `Serial → ${cmd}` );
 
             this._port.write( cmd );
 
+            const lines : Buffer[] = [];
+
             const answerTimeout = setTimeout( () => {
-                reject( 'Timeout; no answer received' );
+                if ( lines.length > 0 ) {
+                    resolve( lines );
+                } else {
+                    reject( 'Timeout; no answer received' );
+                }
                 releaseSemaphore();
             }, timeout );
 
             this._currentReader = ( line : Buffer ) => {
-                clearTimeout( answerTimeout );
-                resolve( line );
-                releaseSemaphore();
+                lines.push( line );
+
+                if ( lines.length >= expectedLines ) {
+                    clearTimeout( answerTimeout );
+                    resolve( lines );
+                    releaseSemaphore();
+                }
             };
 
         } ) );
         return result.finally( () => {
-            this.resetReader()
+            this.resetReader();
         } );
     }
 
