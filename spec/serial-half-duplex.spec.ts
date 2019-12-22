@@ -46,4 +46,28 @@ describe( 'Half duplex serial IO', () => {
         return expectAsync( p ).toBeRejected();
     }, 100 );
 
+    describe( 'sendAndReceiveMany', () => {
+
+        it( 'can receive multiple lines', () => {
+            const shd = new SerialHalfDuplex( port );
+            setTimeout( () => port.writeToPipe( Buffer.from( '123\r\n' ) ), 10 );
+            setTimeout( () => port.writeToPipe( Buffer.from( '45\r\n' ) ), 15 );
+            setTimeout( () => port.writeToPipe( Buffer.from( '6\r\n' ) ), 20 );
+            return expectAsync( shd.sendAndReceiveMany( Buffer.from( 'foo' ), 50, 3 ) ).toBeResolvedTo( [
+                Buffer.from( '123' ),
+                Buffer.from( '45' ),
+                Buffer.from( '6' ),
+            ] );
+        } );
+
+        it( 'resolves when at least one line is received', () => {
+            const shd = new SerialHalfDuplex( port );
+            setTimeout( () => port.writeToPipe( Buffer.from( '123\r\n' ) ), 10 );
+            return expectAsync( shd.sendAndReceiveMany( Buffer.from( 'foo' ), 50, 3 ) ).toBeResolvedTo( [
+                Buffer.from( '123' ),
+            ] );
+        } );
+
+    } );
+
 } );

@@ -1,5 +1,15 @@
+import { vrc } from 'vrc';
+
 const SerialPort = require( 'serialport' );
 const Readline = require( '@serialport/parser-readline' );
+
+interface Conf {
+    device : string;
+}
+
+const conf : Conf = vrc( 'serialport-test', [
+    { name: 'device', type: 'string', dflt: undefined, desc: 'Device to use (default: First available device)' },
+] ).conf;
 
 const openPort = ( portName : string ) => {
     console.log( `Opening serial port ${portName} …` );
@@ -15,6 +25,8 @@ const openPort = ( portName : string ) => {
             console.log( `Serial port opened.` );
         }
     } );
+
+    port.debugMode = true;
 
     port.on( 'error', () => {
         console.error( `Unhandled serial error` );
@@ -33,9 +45,13 @@ SerialPort.list().then( ( portInfo : any[] ) => {
     console.log( portInfo.map( ( el ) => `* ${el.comName}: ${JSON.stringify( el )}` ).join( '\n' ) );
 
     const uartPorts = portInfo.filter( ( el ) => el.vendorId === '10c4' );
-    if ( uartPorts.length === 0 ) {
-        console.log( `No UART devices found.` );
+    if ( conf.device !== undefined ) {
+        openPort( conf.device );
     } else {
-        openPort( uartPorts[ 0 ].comName );
+        if ( uartPorts.length === 0 ) {
+            console.log( `No UART devices found.` );
+        } else {
+            openPort( uartPorts[ 0 ].comName );
+        }
     }
 } );
