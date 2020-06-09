@@ -87,6 +87,10 @@ minicom -b 9600 -o -D /dev/pts/4
 
 ## Changelog
 
+### v2.0.0 (2020-06-09)
+
+* Breaking: Updated `serialport` to v9 to support Node.js 14. This requires Node.js > 8.
+
 ### v1.3.1 (2019-12-22)
 
 * Changed: Documentation updated
