@@ -1,6 +1,6 @@
 {
   "name": "serial-half-duplex",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Half-duplex serial port for communication with serial devices",
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
@@ -30,15 +30,15 @@
   },
   "homepage": "https://github.com/Granjow/serial-half-duplex#readme",
   "devDependencies": {
-    "@types/jasmine": "^3.5.10",
-    "@types/node": "^14.0.12",
-    "jasmine": "^3.5.0",
-    "jasmine-core": "^3.5.0",
-    "typescript": "^3.9.5",
-    "vrc": "^2.2.0"
+    "@types/jasmine": "^3.5.14",
+    "@types/node": "^14.6.4",
+    "jasmine": "^3.6.1",
+    "jasmine-core": "^3.6.0",
+    "typescript": "^4.0.2",
+    "vrc": "^2.3.0"
   },
   "dependencies": {
     "semaphore-promise": "^1.2.0",
-    "serialport": "^9.0.0"
+    "serialport": "^9.0.1"
   }
 }
