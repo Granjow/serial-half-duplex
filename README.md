@@ -53,8 +53,8 @@ Send a command and wait for multiple answers.
 The command resolves when at least one line is returned within the timeout.
 
 Waiting for multiple lines is useful in cases where a device returns multiple
-lines to one command. For example, the Acer beamer H5382BD sends `*001\rLAMP
-0\r` when querying the lamp state.
+lines to one command. For example, the Acer beamer H5382BD replies with
+`*001\rLAMP 0\r` when querying the lamp state.
 
 
 #### send( cmd : Buffer ) : Promise&lt;void&gt;
@@ -86,6 +86,14 @@ minicom -b 9600 -o -D /dev/pts/4
 
 
 ## Changelog
+
+
+### v2.1.0 (2020-11-17)
+
+* Changed: `SerialHalfDuplex.findSuitablePort()` now accepts a predicate
+  which determines if a port is suitable, instead of only listing CP210x UART bridges.
+  (This is still the default filter, so the change is backwards compatible.)
+* Changed: Dependencies updated
 
 ### v2.0.1 (2020-06-09)
 

@@ -28,6 +28,28 @@ export interface SerialPortArgs {
     stopBits : number;
 }
 
+export interface OnMessageCallback {
+    ( message : Buffer ) : void;
+}
+
+/**
+ * See
+ * https://serialport.io/docs/api-stream#serialportlist
+ */
+export interface PortInfo {
+    path : string;
+    manufacturer : string | undefined;
+    serialNumber : string | undefined;
+    pnpId : string | undefined;
+    locationId : string | undefined;
+    productId : string | undefined;
+    vendorId : string | undefined;
+}
+
+export interface PredicateFilter {
+    ( info : PortInfo ) : boolean;
+}
+
 export class SerialHalfDuplex {
 
     static readonly defaultSerialPortArgs : SerialPortArgs = {
@@ -37,13 +59,15 @@ export class SerialHalfDuplex {
         stopBits: 1,
     };
 
-    static findSuitablePort() : Promise<string> {
-        return SerialPort.list().then( ( portInfo : any[] ) => {
+    static readonly isCp210xUartBridge : PredicateFilter = ( info ) => info.vendorId === '10c4';
+
+    static findSuitablePort( predicate : ( info : PortInfo ) => boolean = SerialHalfDuplex.isCp210xUartBridge ) : Promise<string> {
+        return SerialPort.list().then( ( portInfo : PortInfo[] ) => {
             const uartPorts = portInfo.filter( ( el ) => el.vendorId === '10c4' );
             if ( uartPorts.length === 0 ) {
                 throw new Error( `No UART devices found.` );
             } else {
-                return uartPorts[ 0 ].comName;
+                return uartPorts[ 0 ].path;
             }
         } );
     }
@@ -153,6 +177,10 @@ export class SerialHalfDuplex {
         } );
     }
 
+    onMessage( callback : OnMessageCallback ) : void {
+        this._onMessageCallbacks.push( callback );
+    }
+
     /**
      * Close the serial port.
      */
@@ -172,7 +200,10 @@ export class SerialHalfDuplex {
      */
     private resetReader() {
         this._currentReader = ( line : Buffer ) => {
-            if ( this.debugMode ) console.log( `Serial: Ignored line ${line}` );
+            if ( this.debugMode ) console.log( `Serial: Received spontaneous data: ${line}` );
+            for ( let callback of this._onMessageCallbacks ) {
+                callback( line );
+            }
         }
     }
 
@@ -180,5 +211,6 @@ export class SerialHalfDuplex {
     private _port : ISerialPort;
     private _semaphore : Semaphore = new Semaphore( 1 );
     private _currentReader : ( line : Buffer ) => void;
+    private _onMessageCallbacks : OnMessageCallback[] = [];
 
 }
