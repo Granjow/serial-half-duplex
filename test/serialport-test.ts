@@ -51,7 +51,7 @@ SerialPort.list().then( ( portInfo : any[] ) => {
         if ( uartPorts.length === 0 ) {
             console.log( `No UART devices found.` );
         } else {
-            openPort( uartPorts[ 0 ].comName );
+            openPort( uartPorts[ 0 ].path );
         }
     }
 } );

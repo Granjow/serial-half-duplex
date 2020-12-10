@@ -84,6 +84,17 @@ not forget to enable echo (`Ctrl+A E`) and disable hardware flow control
 minicom -b 9600 -o -D /dev/pts/4
 ```
 
+Be aware that minicom only sends carriage return `\r`, but not new lines `\n`
+after commands. It therefore cannot be used for debugging.
+
+To analyse the exact data which is sent through minicom, attach `strace` to the
+minicom process ID. Note that also stdin/stdout data is shown with file
+descriptors `0` and `1`.
+
+```bash
+strace -p PID -e read,write
+```
+
 
 ## Changelog
 

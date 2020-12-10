@@ -2,8 +2,8 @@
   "name": "serial-half-duplex",
   "version": "2.1.0",
   "description": "Half-duplex serial port for communication with serial devices",
-  "main": "dist/src/index.js",
-  "types": "dist/src/index.d.ts",
+  "main": "dist/src/serial-half-duplex.js",
+  "types": "dist/src/serial-half-duplex.d.ts",
   "files": [
     "dist/src/*",
     "README.md"

@@ -18,7 +18,8 @@ export interface ISerialPort {
 
 export interface SerialHalfDuplexArgs {
     /** What is used by the communication endpoint to mark the end of a response? Often `\r` or `\r\n`. */
-    delimiter: string;
+    inputDelimiter: string;
+    debugMode?: boolean;
 }
 
 export interface SerialPortArgs {
@@ -72,19 +73,22 @@ export class SerialHalfDuplex {
         } );
     }
 
-    static openSerialPort( portName: string, args?: SerialPortArgs ): ISerialPort {
+    static async openSerialPort( portName: string, args?: SerialPortArgs ): Promise<ISerialPort> {
 
         console.log( `Opening serial port ${portName} …` );
 
         const settings: SerialPortArgs = Object.assign( {}, SerialHalfDuplex.defaultSerialPortArgs, args );
-        console.log( 'Settings:', JSON.stringify( settings ) );
+        console.log( `Settings for ${portName}:`, JSON.stringify( settings ) );
 
-        return new SerialPort( portName, settings, ( error: Error ) => {
-            if ( error ) {
-                console.log( `Could not open port: ${error.message}` );
-            } else {
-                console.log( `Serial port opened.` );
-            }
+        return new Promise( ( resolve, reject ) => {
+            const port = new SerialPort( portName, settings, ( error: Error ) => {
+                if ( error ) {
+                    reject( `Could not open port: ${error.message}` );
+                } else {
+                    console.log( `Serial port ${portName} opened.` );
+                    resolve( port );
+                }
+            } );
         } );
     }
 
@@ -98,11 +102,13 @@ export class SerialHalfDuplex {
      */
     constructor( port: ISerialPort, args?: SerialHalfDuplexArgs ) {
 
+        this.debugMode = args?.debugMode ?? false;
+
         port.on( 'error', () => {
             console.error( `Unhandled serial error` );
         } );
 
-        const parser = port.pipe( new Delimiter( { delimiter: Buffer.from( ( args && args.delimiter ) || '\r\n' ) } ) );
+        const parser = port.pipe( new Delimiter( { delimiter: Buffer.from( ( args && args.inputDelimiter ) || '\r\n' ) } ) );
         parser.on( 'data', ( data: any ) => {
             if ( this.debugMode ) console.log( `Serial ← ${data}` );
             this._currentReader( Buffer.from( data ) );
