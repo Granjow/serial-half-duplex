@@ -12,12 +12,12 @@ export class VirtualSerialPort implements ISerialPort {
     }
 
     writeToPipe( data : Buffer ) {
-        this._dest._write( data, 'utf8', ( err : any ) => {
+        this._dest?._write( data, 'utf8', ( err : any ) => {
             if ( err ) throw new Error( err );
         } );
     }
 
-    _dest : Transform;
+    _dest : Transform|undefined;
 
     write( data : Buffer | string ) : boolean {
         return true;

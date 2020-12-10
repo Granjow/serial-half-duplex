@@ -22,10 +22,10 @@ export interface SerialHalfDuplexArgs {
 }
 
 export interface SerialPortArgs {
-    baudRate : number;
-    dataBits : number;
-    parity : string;
-    stopBits : number;
+    baudRate? : number;
+    dataBits? : number;
+    parity?: string;
+    stopBits?: number;
 }
 
 export interface OnMessageCallback {
@@ -210,7 +210,7 @@ export class SerialHalfDuplex {
 
     private _port : ISerialPort;
     private _semaphore : Semaphore = new Semaphore( 1 );
-    private _currentReader : ( line : Buffer ) => void;
+    private _currentReader! : ( line : Buffer ) => void;
     private _onMessageCallbacks : OnMessageCallback[] = [];
 
 }
