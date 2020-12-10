@@ -3,30 +3,30 @@ import { Transform } from 'stream';
 
 export class VirtualSerialPort implements ISerialPort {
 
-    on( eventName : string, f : () => void ) : void {
+    on( eventName: string, f: () => void ): void {
     }
 
-    pipe( dest : Transform ) : any {
+    pipe( dest: Transform ): any {
         this._dest = dest;
         return dest;
     }
 
-    writeToPipe( data : Buffer ) {
-        this._dest?._write( data, 'utf8', ( err : any ) => {
+    writeToPipe( data: Buffer ) {
+        this._dest?._write( data, 'utf8', ( err: any ) => {
             if ( err ) throw new Error( err );
         } );
     }
 
-    _dest : Transform|undefined;
+    _dest: Transform | undefined;
 
-    write( data : Buffer | string ) : boolean {
+    write( data: Buffer | string ): boolean {
         return true;
     }
 
-    drain( f? : ( error? : any ) => void ) : void {
+    drain( f?: ( error?: any ) => void ): void {
     }
 
-    close( f : ( error? : any ) => void ) : void {
+    close( f: ( error?: any ) => void ): void {
         f();
     }
 }

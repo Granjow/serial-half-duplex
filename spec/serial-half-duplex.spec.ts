@@ -4,7 +4,7 @@ import { VirtualSerialPort } from './virtual-serial.port';
 
 describe( 'Half duplex serial IO', () => {
 
-    let port : VirtualSerialPort;
+    let port: VirtualSerialPort;
 
     beforeEach( () => {
         port = new VirtualSerialPort();
