@@ -99,7 +99,7 @@ strace -p PID -e read,write
 ## Changelog
 
 
-### v2.1.0 (2020-11-17)
+### v2.1.0 (2021-03-03)
 
 * Changed: `SerialHalfDuplex.findSuitablePort()` now accepts a predicate
   which determines if a port is suitable, instead of only listing CP210x UART bridges.
