@@ -29,6 +29,8 @@ See your favourite editor’s autocomplete support for the full documentation.
 Constructor. `args` allows to configure
 
 * `delimiter` which marks the end of a response
+* `logger` like `SerialHalfDuplex.consoleLogger` which logs communication
+  details, if defined
 
 
 #### debugMode : boolean
@@ -97,6 +99,12 @@ strace -p PID -e read,write
 
 
 ## Changelog
+
+
+### v3.0.0
+
+* Changed: Constructor now takes a logger for debugging instead of a boolean flag.
+  This does not force the usage of `console` anymore and allows to customise output.
 
 
 ### v2.1.0 (2021-03-03)

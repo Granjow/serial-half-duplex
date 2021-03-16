@@ -16,10 +16,17 @@ export interface ISerialPort {
     close( f?: ( error?: any ) => void ): void;
 }
 
+export interface ISerialLogger {
+    info( data: string ): void;
+
+    error( data: string ): void;
+}
+
 export interface SerialHalfDuplexArgs {
     /** What is used by the communication endpoint to mark the end of a response? Often `\r` or `\r\n`. */
     inputDelimiter: string;
-    debugMode?: boolean;
+    /** When defined, data exchanged over the serial port is printed with the logger. */
+    logger?: ISerialLogger;
 }
 
 export interface SerialPortArgs {
@@ -60,6 +67,16 @@ export class SerialHalfDuplex {
         stopBits: 1,
     };
 
+    static readonly consoleLogger: ISerialLogger = {
+        error( data: string ): void {
+            console.error( data.replace( /\n/g, '␊' ).replace( /\r/g, '␍' ) );
+        },
+
+        info( data: string ): void {
+            console.log( data.replace( /\n/g, '␊' ).replace( /\r/g, '␍' ) );
+        },
+    };
+
     static readonly isCp210xUartBridge: PredicateFilter = ( info ) => info.vendorId === '10c4';
 
     static findSuitablePort( predicate: ( info: PortInfo ) => boolean = SerialHalfDuplex.isCp210xUartBridge ): Promise<string> {
@@ -93,31 +110,27 @@ export class SerialHalfDuplex {
     }
 
 
-    // When set to true, data that is sent and received over the serial port is printed.
-    debugMode: boolean = false;
-
     /**
      * @param port Needs to be opened beforehand, e.g. with SerialHalfDuplex#openSerialPort
      * @param args Additional arguments to configure serial settings
      */
     constructor( port: ISerialPort, args?: SerialHalfDuplexArgs ) {
 
-        this.debugMode = args?.debugMode ?? false;
+        this._logger = args?.logger;
 
         port.on( 'error', () => {
-            console.error( `Unhandled serial error` );
+            ( this._logger ?? console ).error( `Unhandled serial error` );
         } );
 
         const parser = port.pipe( new Delimiter( { delimiter: Buffer.from( ( args && args.inputDelimiter ) || '\r\n' ) } ) );
         parser.on( 'data', ( data: any ) => {
-            if ( this.debugMode ) console.log( `Serial ← ${data}` );
+            this._logger?.info( `Serial ← ${data}` );
             this._currentReader( Buffer.from( data ) );
         } );
 
         this._port = port;
 
         this.resetReader();
-
     }
 
 
@@ -140,7 +153,7 @@ export class SerialHalfDuplex {
      */
     sendAndReceiveMany( cmd: Buffer, timeout: number = 20, expectedLines: number = 1 ): Promise<Buffer[]> {
         const result: Promise<Buffer[]> = this._semaphore.acquire().then( ( releaseSemaphore ) => new Promise<Buffer[]>( ( resolve, reject ) => {
-            if ( this.debugMode ) console.log( `Serial → ${cmd}` );
+            this._logger?.info( `Serial → ${cmd}` );
 
             this._port.write( cmd );
 
@@ -183,6 +196,10 @@ export class SerialHalfDuplex {
         } );
     }
 
+    /**
+     * Attach a callback to incoming messages which are not sent as answer to a command,
+     * i.e. data which the device sends on its own.
+     */
     onMessage( callback: OnMessageCallback ): void {
         this._onMessageCallbacks.push( callback );
     }
@@ -206,7 +223,7 @@ export class SerialHalfDuplex {
      */
     private resetReader() {
         this._currentReader = ( line: Buffer ) => {
-            if ( this.debugMode ) console.log( `Serial: Received spontaneous data: ${line}` );
+            this._logger?.info( `Serial: Received spontaneous data: ${line}` );
             for ( let callback of this._onMessageCallbacks ) {
                 callback( line );
             }
@@ -214,9 +231,12 @@ export class SerialHalfDuplex {
     }
 
 
-    private _port: ISerialPort;
-    private _semaphore: Semaphore = new Semaphore( 1 );
+    private readonly _logger: ISerialLogger | undefined;
+
+    private readonly _port: ISerialPort;
+    private readonly _semaphore: Semaphore = new Semaphore( 1 );
+    private readonly _onMessageCallbacks: OnMessageCallback[] = [];
+
     private _currentReader!: ( line: Buffer ) => void;
-    private _onMessageCallbacks: OnMessageCallback[] = [];
 
 }
