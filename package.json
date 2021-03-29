@@ -1,6 +1,6 @@
 {
   "name": "serial-half-duplex",
-  "version": "2.1.0",
+  "version": "3.0.0",
   "description": "Half-duplex serial port for communication with serial devices",
   "main": "dist/src/serial-half-duplex.js",
   "types": "dist/src/serial-half-duplex.d.ts",
@@ -39,6 +39,6 @@
   },
   "dependencies": {
     "semaphore-promise": "^1.2.0",
-    "serialport": "^9.0.3"
+    "serialport": "^9.0.7"
   }
 }

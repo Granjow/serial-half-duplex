@@ -101,10 +101,10 @@ strace -p PID -e read,write
 ## Changelog
 
 
-### v3.0.0
+### v3.0.0 (2021-03-29)
 
 * Changed: Constructor now takes a logger for debugging instead of a boolean flag.
-  This does not force the usage of `console` anymore and allows to customise output.
+  This does not force the usage of `console` anymore and allows customising output.
 
 
 ### v2.1.0 (2021-03-03)
