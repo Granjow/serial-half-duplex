@@ -5,7 +5,7 @@ const SerialPort = require( 'serialport' );
 const Delimiter = require( '@serialport/parser-delimiter' );
 
 export interface ISerialPort {
-    on( eventName: string, f: Function ): void;
+    on( eventName: 'open' | 'error' | 'close' | 'data' | 'drain', f: Function ): void;
 
     pipe( transform: Transform ): any;
 
@@ -56,6 +56,14 @@ export interface PortInfo {
 
 export interface PredicateFilter {
     ( info: PortInfo ): boolean;
+}
+
+export class TimeoutError extends Error {
+    public readonly isTimeoutError = true;
+
+    constructor( message: string ) {
+        super( message );
+    }
 }
 
 export class SerialHalfDuplex {
@@ -109,6 +117,13 @@ export class SerialHalfDuplex {
         } );
     }
 
+    /**
+     * Get the underlying Serial Port object which is used for communication.
+     * Use it to e.g. attach close/error callbacks.
+     */
+    public get port(): ISerialPort {
+        return this._port;
+    }
 
     /**
      * @param port Needs to be opened beforehand, e.g. with SerialHalfDuplex#openSerialPort
@@ -163,7 +178,7 @@ export class SerialHalfDuplex {
                 if ( lines.length > 0 ) {
                     resolve( lines );
                 } else {
-                    reject( 'Timeout; no answer received' );
+                    reject( new TimeoutError( 'Timeout; no answer received' ) );
                 }
                 releaseSemaphore();
             }, timeout );
@@ -205,9 +220,10 @@ export class SerialHalfDuplex {
     }
 
     /**
-     * Close the serial port.
+     * Close the serial port and remove callback listeners
      */
     close(): Promise<void> {
+        this._onMessageCallbacks.length = 0;
         return new Promise( ( resolve, reject ) => {
             this._port.close( ( error: any ) => {
                 if ( error ) reject( error );

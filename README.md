@@ -100,6 +100,10 @@ strace -p PID -e read,write
 
 ## Changelog
 
+### v3.1.0 (2022-02-08)
+
+* Added: The SerialPort `port` object is now exposed.
+* Changed: Answer timeouts now reject with a `TimeoutError`
 
 ### v3.0.0 (2021-03-29)
 
