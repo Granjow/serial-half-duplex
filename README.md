@@ -100,6 +100,11 @@ strace -p PID -e read,write
 
 ## Changelog
 
+
+### vNext
+
+* Changed: Better error message in case of timeout
+
 ### v3.1.0 (2022-02-08)
 
 * Added: The SerialPort `port` object is now exposed.

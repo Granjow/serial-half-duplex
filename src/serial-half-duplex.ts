@@ -178,7 +178,7 @@ export class SerialHalfDuplex {
                 if ( lines.length > 0 ) {
                     resolve( lines );
                 } else {
-                    reject( new TimeoutError( 'Timeout; no answer received' ) );
+                    reject( new TimeoutError( `Timeout; no answer received within ${timeout} ms` ) );
                 }
                 releaseSemaphore();
             }, timeout );
