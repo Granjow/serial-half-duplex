@@ -1,8 +1,7 @@
 import { Semaphore } from 'semaphore-promise';
 import { Transform } from 'stream';
-
-const SerialPort = require( 'serialport' );
-const Delimiter = require( '@serialport/parser-delimiter' );
+import { DelimiterParser as DelimiterParser } from '@serialport/parser-delimiter';
+import { SerialPort, SerialPortOpenOptions } from 'serialport';
 
 export interface ISerialPort {
     on( eventName: 'open' | 'error' | 'close' | 'data' | 'drain', f: Function ): void;
@@ -68,7 +67,7 @@ export class TimeoutError extends Error {
 
 export class SerialHalfDuplex {
 
-    static readonly defaultSerialPortArgs: SerialPortArgs = {
+    static readonly defaultSerialPortArgs = {
         baudRate: 9600,
         dataBits: 8,
         parity: 'none',
@@ -98,22 +97,38 @@ export class SerialHalfDuplex {
         } );
     }
 
-    static async openSerialPort( portName: string, args?: SerialPortArgs ): Promise<ISerialPort> {
+    static async openSerialPort( portName: string, args?: SerialPortOpenOptions<any> ): Promise<ISerialPort> {
 
         console.log( `Opening serial port ${portName} …` );
 
-        const settings: SerialPortArgs = Object.assign( {}, SerialHalfDuplex.defaultSerialPortArgs, args );
+        const settings: SerialPortOpenOptions<any> = {
+            path: portName,
+            baudRate: args?.baudRate ?? SerialHalfDuplex.defaultSerialPortArgs.baudRate,
+        };
+
+        if ( args !== undefined ) {
+            for ( const key of Object.keys( args ) ) {
+                // @ts-ignore
+                settings[ key ] = args[ key ];
+            }
+        }
+
+        const settings2: SerialPortOpenOptions<any> = Object.assign( { path: portName }, SerialHalfDuplex.defaultSerialPortArgs, args );
+
         console.log( `Settings for ${portName}:`, JSON.stringify( settings ) );
 
         return new Promise( ( resolve, reject ) => {
-            const port = new SerialPort( portName, settings, ( error: Error ) => {
-                if ( error ) {
-                    reject( `Could not open port: ${error.message}` );
-                } else {
-                    console.log( `Serial port ${portName} opened.` );
-                    resolve( port );
+            const port = new SerialPort(
+                settings,
+                ( error: Error | null ) => {
+                    if ( error ) {
+                        reject( `Could not open port: ${error.message}` );
+                    } else {
+                        console.log( `Serial port ${portName} opened.` );
+                        resolve( port );
+                    }
                 }
-            } );
+            );
         } );
     }
 
@@ -137,7 +152,7 @@ export class SerialHalfDuplex {
             ( this._logger ?? console ).error( `Unhandled serial error` );
         } );
 
-        const parser = port.pipe( new Delimiter( { delimiter: Buffer.from( ( args && args.inputDelimiter ) || '\r\n' ) } ) );
+        const parser = port.pipe( new DelimiterParser( { delimiter: Buffer.from( ( args && args.inputDelimiter ) || '\r\n' ) } ) );
         parser.on( 'data', ( data: any ) => {
             this._logger?.info( `Serial ← ${data}` );
             this._currentReader( Buffer.from( data ) );
@@ -239,7 +254,7 @@ export class SerialHalfDuplex {
      */
     private resetReader() {
         this._currentReader = ( line: Buffer ) => {
-            this._logger?.info( `Serial: Received spontaneous data: ${line}` );
+            this._logger?.info( `Serial: Received spontaneous data, will run ${this._onMessageCallbacks.length} callbacks: ${line}` );
             for ( let callback of this._onMessageCallbacks ) {
                 callback( line );
             }

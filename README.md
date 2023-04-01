@@ -103,7 +103,11 @@ strace -p PID -e read,write
 
 ### vNext
 
+This version updates from SerialPort 9 to 10 and improves logging.
+
 * Changed: Better error message in case of timeout
+* Changed: Log callback count when receiving spontaneous message
+* Changed: Update `serialport` to version 10
 
 ### v3.1.0 (2022-02-08)
 
