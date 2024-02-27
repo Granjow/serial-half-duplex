@@ -2,7 +2,6 @@ dist
 node_modules
 *.tgz
 .idea/*.xml
-.idea/*.iml
 .idea/$CACHE_FILE$
 .idea/inspectionProfiles/
 .idea/dictionaries

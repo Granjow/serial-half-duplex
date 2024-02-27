@@ -1,9 +1,24 @@
-test:
+.test:
   stage: test
-  image: node:10
   tags:
     - linux
   script:
     - npm install
     - npm run build
     - npm run test
+
+test-14:
+  extends: .test
+  image: node:14
+
+test-16:
+  extends: .test
+  image: node:16
+
+test-18:
+  extends: .test
+  image: node:18
+
+test-20:
+  extends: .test
+  image: node:20
