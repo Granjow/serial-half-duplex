@@ -14,6 +14,7 @@ receive data at the same time.
 const serial = new SerialHalfDuplex( SerialHalfDuplex.openSerialPort( '/dev/ttyUSB0' ) );
 const timeoutMillis = 200;
 
+// Send data over the serial port, wait for the response, and process it
 serial.sendAndReceive( Buffer.from( 'Hello!' ), timeoutMillis )
     .then( ( answer ) => console.log( answer.toString() ) )
     .catch( ( err ) => console.error( err ) );
@@ -103,11 +104,14 @@ strace -p PID -e read,write
 
 ### vNext
 
+### v4.0.0 (2024-02-27)
+
 This version updates from SerialPort 9 to 12 and improves logging.
 
 * Changed: Better error message in case of timeout
 * Changed: Log callback count when receiving spontaneous message
 * Changed: Update `serialport` to version 10
+* Breaking: Node.js 14 or newer is required.
 
 ### v3.1.0 (2022-02-08)
 
