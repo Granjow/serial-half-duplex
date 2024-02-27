@@ -104,6 +104,11 @@ strace -p PID -e read,write
 
 ### vNext
 
+### v4.0.1 (2024-02-27)
+
+* Fixed: `openSerialPort()` optional arguments can be partial
+* Fixed: `findSuitablePort()` predicate is now actually used
+
 ### v4.0.0 (2024-02-27)
 
 This version updates from SerialPort 9 to 12 and improves logging.

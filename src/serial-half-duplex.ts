@@ -86,9 +86,13 @@ export class SerialHalfDuplex {
 
     static readonly isCp210xUartBridge: PredicateFilter = ( info ) => info.vendorId === '10c4';
 
+
+    /**
+     * Finds a serial port based on a filter predicate.
+     */
     static findSuitablePort( predicate: ( info: PortInfo ) => boolean = SerialHalfDuplex.isCp210xUartBridge ): Promise<string> {
         return SerialPort.list().then( ( portInfo: PortInfo[] ) => {
-            const uartPorts = portInfo.filter( ( el ) => el.vendorId === '10c4' );
+            const uartPorts = portInfo.filter( predicate );
             if ( uartPorts.length === 0 ) {
                 throw new Error( `No UART devices found.` );
             } else {
@@ -97,7 +101,7 @@ export class SerialHalfDuplex {
         } );
     }
 
-    static async openSerialPort( portName: string, args?: SerialPortOpenOptions<any> ): Promise<ISerialPort> {
+    static async openSerialPort( portName: string, args?: Partial<SerialPortOpenOptions<any>> ): Promise<ISerialPort> {
 
         console.log( `Opening serial port ${portName} …` );
 
